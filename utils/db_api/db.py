@@ -11,6 +11,7 @@ class Database:
     def create_users_table():
         con.execute("""CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id VARCHAR(255),
                     username VARCHAR(255),
                     full_name VARCHAR(255),
                     joined_date TEXT
@@ -20,9 +21,11 @@ class Database:
 
     @staticmethod
     def add_user(user_id, username, full_name, joined_date=today):
-        cur.execute("INSERT INTO user (username, full_name, joined_date) VALUES (?, ?, ?)", user_id, username, full_name, joined_date)
-        con.commit()
-        print(f"{full_name} successfully added")
+        cur.execute(f"SELECT * FROM users WHERE user_id = '{user_id}'")
+        if not cur.fetchall():
+            cur.execute("INSERT INTO users (user_id, username, full_name, joined_date) VALUES (?, ?, ?, ?)", (user_id, username, full_name, joined_date))
+            con.commit()
+            print(f"{full_name} successfully added")
 
     @staticmethod
     def get_word(word_id):

@@ -2,12 +2,13 @@ from aiogram import types
 from loader import dp, db
 from aiogram.dispatcher.filters import Command
 from filters.is_admin import IsAdmin
-import random 
+import random
 from data.config import CHANNEL_ID
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    
 
 
-async def give_question():
+@dp.message_handler(Command("send_quiz"), IsAdmin())
+async def send_one_quiz(message: types.Message):
     db.todays_words_table()
     random_word_id = random.randint(2, 3000)
     if db.check_word(random_word_id):
@@ -37,21 +38,4 @@ async def give_question():
         explanation_parse_mode=types.ParseMode.MARKDOWN
     )
     db.add_todays_word(word[0])
-
-scheduler = AsyncIOScheduler()
-
-
-@dp.message_handler(IsAdmin(), Command("start_question"))
-async def start_question(message: types.Message):
-    db.todays_words_table()
-    scheduler.add_job(give_question, trigger='interval', seconds=5)
-    if not scheduler.running:
-        scheduler.start()
-        for i in scheduler.get_jobs():
-            await message.answer(f"So'zlarni yuborish boshlandi.\nTo'xtatish uchun /stop_question \nKeyingisi : {i.next_run_time}")
-    else:
-        scheduler.resume()
-        for i in scheduler.get_jobs():
-            await message.answer(f"So'zlarni yuborish boshlandi. Keyingisi : {i.next_run_time}")
-
-
+    await message.answer("Yuborildi")
